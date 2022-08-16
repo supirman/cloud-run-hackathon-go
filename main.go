@@ -73,8 +73,8 @@ func getCost(a ArenaUpdate, myId string) (playerDistance map[string]Option) {
 	for key, state := range a.Arena.State {
 		if key != myId {
 			var nextMove = "T"
-			dX := myState.X - state.X
-			dY := myState.Y - state.Y
+			dX := state.X - myState.X
+			dY := state.Y - myState.Y
 
 			xDir := myState.Direction
 			if dX > 0 {
