@@ -166,11 +166,11 @@ func play(input ArenaUpdate) (response string) {
 			}
 		}
 	} else { // run away
-		max := -1
-		for k, option := range playerCost {
-			if option.Cost > max {
-				max = option.Cost
-				nextMove = option.NextMove
+		min := int(^uint(0) >> 1)
+		for k, state := range input.Arena.State {
+			if state.Score < min && k != myId {
+				min = state.Score
+				nextMove = playerCost[k].NextMove
 				target = k
 			}
 		}
