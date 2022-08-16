@@ -146,25 +146,28 @@ func play(input ArenaUpdate) (response string) {
 	playerCost := getCost(input, myId)
 	log.Printf("OPTIONS: %#v", playerCost)
 	nextMove := "T"
+	target := myId
 	if !myState.WasHit {
 		min := input.Arena.Dimensions[0] + input.Arena.Dimensions[1] + 4
 
-		for _, option := range playerCost {
+		for k, option := range playerCost {
 			if option.Cost < min {
 				min = option.Cost
 				nextMove = option.NextMove
+				target = k
 			}
 		}
 	} else { // run away
 		max := -1
-		for _, option := range playerCost {
+		for k, option := range playerCost {
 			if option.Cost > max {
 				max = option.Cost
 				nextMove = option.NextMove
+				target = k
 			}
 		}
 	}
-
+	log.Printf("Next: %#v, %#v", target, nextMove)
 	return nextMove
 }
 
