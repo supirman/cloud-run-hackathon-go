@@ -19,3 +19,8 @@ type PlayerState struct {
 	WasHit    bool   `json:"wasHit"`
 	Score     int    `json:"score"`
 }
+
+type Option struct {
+	Cost     int
+	NextMove string
+}

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	rand2 "math/rand"
 	"net/http"
 	"os"
 )
@@ -19,6 +18,33 @@ func main() {
 	log.Printf("starting server on port :%s", port)
 	err := http.ListenAndServe(":"+port, nil)
 	log.Fatalf("http listen error: %v", err)
+}
+
+var directionCost = map[string]map[string]int{
+	"N": {
+		"N": 0,
+		"E": 1,
+		"S": 2,
+		"W": -1,
+	},
+	"E": {
+		"N": -1,
+		"E": 0,
+		"S": 1,
+		"W": 2,
+	},
+	"S": {
+		"N": 2,
+		"E": -1,
+		"S": 0,
+		"W": 1,
+	},
+	"W": {
+		"N": 1,
+		"E": 2,
+		"S": -1,
+		"W": 0,
+	},
 }
 
 func handler(w http.ResponseWriter, req *http.Request) {
@@ -41,10 +67,107 @@ func handler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, resp)
 }
 
+func getCost(a ArenaUpdate, myId string) (playerDistance map[string]Option) {
+	var playerCost map[string]Option
+	myState := a.Arena.State[myId]
+	for key, state := range a.Arena.State {
+		if key != myId {
+			var nextMove = "T"
+			dX := myState.X - state.X
+			dY := myState.Y - state.Y
+
+			xDir := myState.Direction
+			if dX > 0 {
+				xDir = "E"
+			} else if dX < 0 {
+				xDir = "W"
+			}
+
+			yDir := myState.Direction
+			if dY > 0 {
+				yDir = "S"
+			} else if dY < 0 {
+				yDir = "N"
+			}
+
+			if dX != 0 && dY == 0 {
+				yDir = xDir
+			}
+			if dX == 0 && dY != 0 {
+				xDir = yDir
+			}
+
+			// count X movement
+			var xCost = abs(directionCost[myState.Direction][xDir]) + abs(dX) + abs(directionCost[xDir][yDir])
+			// count X movement
+			var yCost = abs(directionCost[myState.Direction][yDir]) + abs(dY) + abs(directionCost[yDir][xDir])
+
+			distance := min(xCost, yCost)
+			// decide next move
+			if distance == 0 {
+				nextMove = "T"
+			} else if distance == xCost {
+				if directionCost[myState.Direction][xDir] < 0 {
+					nextMove = "L"
+				} else if directionCost[myState.Direction][xDir] > 0 {
+					nextMove = "R" // TODO: decide if need to rotate twice
+				} else if dY != 0 {
+					nextMove = "F"
+				} else if directionCost[xDir][yDir] < 0 {
+					nextMove = "L"
+				} else if directionCost[xDir][yDir] > 0 {
+					nextMove = "R"
+				}
+			} else if distance == yCost {
+				if directionCost[myState.Direction][yDir] < 0 {
+					nextMove = "L"
+				} else if directionCost[myState.Direction][yDir] > 0 {
+					nextMove = "R" // TODO: decide if need to rotate twice
+				} else if dY != 0 {
+					nextMove = "F"
+				} else if directionCost[yDir][xDir] < 0 {
+					nextMove = "L"
+				} else if directionCost[yDir][xDir] > 0 {
+					nextMove = "R"
+				}
+			}
+
+			playerCost[key] = Option{Cost: distance, NextMove: nextMove}
+		}
+	}
+	return playerCost
+}
+
 func play(input ArenaUpdate) (response string) {
 	log.Printf("IN: %#v", input)
 
-	commands := []string{"F", "R", "L", "T"}
-	rand := rand2.Intn(4)
-	return commands[rand]
+	myId := input.Links.Self.Href
+
+	playerCost := getCost(input, myId)
+	log.Printf("OPTIONS: %#v", playerCost)
+
+	min := input.Arena.Dimensions[0] + input.Arena.Dimensions[1] + 4
+	nextMove := "T"
+	for _, option := range playerCost {
+		if option.Cost < min {
+			min = option.Cost
+			nextMove = option.NextMove
+		}
+	}
+
+	return nextMove
+}
+
+func abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
