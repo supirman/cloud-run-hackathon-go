@@ -98,9 +98,9 @@ func getCost(a ArenaUpdate, myId string) (playerDistance map[string]Option) {
 			}
 
 			// count X movement
-			var xCost = abs(directionCost[myState.Direction][xDir]) + abs(dX) + abs(directionCost[xDir][yDir])
+			var xCost = abs(directionCost[myState.Direction][xDir]) + abs(dX) + abs(directionCost[xDir][yDir]) + max(abs(dY)-3, 0)
 			// count X movement
-			var yCost = abs(directionCost[myState.Direction][yDir]) + abs(dY) + abs(directionCost[yDir][xDir])
+			var yCost = abs(directionCost[myState.Direction][yDir]) + abs(dY) + abs(directionCost[yDir][xDir]) + max(abs(dX)-3, 0)
 
 			distance := min(xCost, yCost)
 			// decide next move
@@ -117,6 +117,10 @@ func getCost(a ArenaUpdate, myId string) (playerDistance map[string]Option) {
 					nextMove = "L"
 				} else if directionCost[xDir][yDir] > 0 {
 					nextMove = "R"
+				} else if dX > 3 {
+					nextMove = "F"
+				} else {
+					nextMove = "T"
 				}
 			} else if distance == yCost {
 				if directionCost[myState.Direction][yDir] < 0 {
@@ -129,6 +133,10 @@ func getCost(a ArenaUpdate, myId string) (playerDistance map[string]Option) {
 					nextMove = "L"
 				} else if directionCost[yDir][xDir] > 0 {
 					nextMove = "R"
+				} else if dY > 3 {
+					nextMove = "F"
+				} else {
+					nextMove = "T"
 				}
 			}
 
@@ -180,6 +188,13 @@ func abs(n int) int {
 
 func min(a, b int) int {
 	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
 		return a
 	}
 	return b
