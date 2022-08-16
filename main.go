@@ -165,6 +165,8 @@ func play(input ArenaUpdate) (response string) {
 				target = k
 			}
 		}
+
+		log.Printf("Next: %#v, %#v", target, nextMove)
 	} else { // run away
 		min := int(^uint(0) >> 1)
 		for k, state := range input.Arena.State {
@@ -174,8 +176,8 @@ func play(input ArenaUpdate) (response string) {
 				target = k
 			}
 		}
+		log.Printf("RUN: %#v, %#v", target, nextMove)
 	}
-	log.Printf("Next: %#v, %#v", target, nextMove)
 	return nextMove
 }
 
