@@ -68,7 +68,7 @@ func handler(w http.ResponseWriter, req *http.Request) {
 }
 
 func getCost(a ArenaUpdate, myId string) (playerDistance map[string]Option) {
-	var playerCost map[string]Option
+	playerCost := make(map[string]Option)
 	myState := a.Arena.State[myId]
 	for key, state := range a.Arena.State {
 		if key != myId {
