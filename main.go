@@ -117,7 +117,7 @@ func getCost(a ArenaUpdate, myId string) (playerDistance map[string]Option) {
 					nextMove = "L"
 				} else if directionCost[xDir][yDir] > 0 {
 					nextMove = "R"
-				} else if dX > 3 {
+				} else if abs(dX) > 3 {
 					nextMove = "F"
 				} else {
 					nextMove = "T"
@@ -133,7 +133,7 @@ func getCost(a ArenaUpdate, myId string) (playerDistance map[string]Option) {
 					nextMove = "L"
 				} else if directionCost[yDir][xDir] > 0 {
 					nextMove = "R"
-				} else if dY > 3 {
+				} else if abs(dY) > 3 {
 					nextMove = "F"
 				} else {
 					nextMove = "T"
@@ -159,7 +159,7 @@ func play(input ArenaUpdate) (response string) {
 		min := input.Arena.Dimensions[0] + input.Arena.Dimensions[1] + 4
 
 		for k, option := range playerCost {
-			if option.Cost < min {
+			if option.Cost < min { // TODO: exclude close player that facing me
 				min = option.Cost
 				nextMove = option.NextMove
 				target = k
